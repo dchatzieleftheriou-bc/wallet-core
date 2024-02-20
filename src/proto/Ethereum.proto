@@ -23,6 +23,9 @@ message Transaction {
 
         // Amount to send (uint256, serialized little endian)
         bytes amount = 2;
+
+        // Optional address
+        string address_reference = 3;
     }
 
     // ERC20 approve transaction

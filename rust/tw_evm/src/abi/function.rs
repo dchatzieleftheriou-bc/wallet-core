@@ -58,7 +58,11 @@ impl Function {
             }
         }
 
+        // Note: the `short_signature` methods only takes the `input_param_types` which come from the ERC20 abi (see erc20.abi.json)
+        // as a result it will create the correct signature regardless of the passed Tokens, 
+        // Any extra Token that do not appear on the ERC20 Abi json will be ignored!
         let signed = short_signature(&self.name, &input_param_types);
+        // this encodes all the given Tokens
         let encoded = encode_tokens(tokens);
         Ok(signed.into_iter().chain(encoded.into_iter()).collect())
     }
