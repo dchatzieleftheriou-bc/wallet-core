@@ -61,7 +61,9 @@ impl<Context: EvmContext> TxBuilder<Context> {
                 let contract_address =
                     Self::parse_address(&input.to_address).context("Invalid Contract address")?;
 
-                let payload = Erc20::transfer(token_to_address, token_amount)
+                let token_address_reference = Self::parse_address_optional(&erc20_transfer.address_reference)?;
+
+                let payload = Erc20::transfer(token_to_address, token_amount, token_address_reference)
                     .map_err(abi_to_signing_error)?;
                 (U256::zero(), payload, Some(contract_address))
             },

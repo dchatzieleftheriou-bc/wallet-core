@@ -64,6 +64,7 @@ fn test_serialize_deserialize() {
     let expected_erc20 = Ethereum::Proto::mod_Transaction::ERC20Transfer {
         to: Cow::from("0x5322b34c88ed0691971bf52a7047448f0f4efc84"),
         amount: Cow::Borrowed(&[27u8, 193, 109, 103, 78, 200, 0, 0]),
+        address_reference: Cow::default(),
     };
     let expected_tx = Ethereum::Proto::Transaction {
         transaction_oneof: Ethereum::Proto::mod_Transaction::OneOftransaction_oneof::erc20_transfer(
