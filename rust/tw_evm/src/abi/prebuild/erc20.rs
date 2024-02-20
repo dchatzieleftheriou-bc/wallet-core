@@ -21,9 +21,13 @@ lazy_static! {
 pub struct Erc20;
 
 impl Erc20 {
-    pub fn transfer(recipient: Address, amount: U256) -> AbiResult<Data> {
+    pub fn transfer(recipient: Address, amount: U256, address_reference: Option<Address>) -> AbiResult<Data> {
         let func = ERC20.function("transfer")?;
-        func.encode_input(&[Token::Address(recipient), Token::u256(amount)])
+        if let Some(address_ref) = address_reference {
+            func.encode_input(&[Token::Address(recipient), Token::u256(amount), Token::Address(address_ref)])    
+        } else {
+            func.encode_input(&[Token::Address(recipient), Token::u256(amount)])
+        }
     }
 
     pub fn approve(spender: Address, amount: U256) -> AbiResult<Data> {

@@ -43,10 +43,11 @@ impl<Context: EvmContext> TxBuilder<Context> {
             },
             Tx::erc20_transfer(ref erc20_transfer) => {
                 let token_to_address = Self::parse_address(&erc20_transfer.to)?;
-                let token_amount = U256::from_big_endian_slice(&erc20_transfer.amount)?;
+                let token_amount = U256::from_big_endian_slice(&erc20_transfer.amount)?; 
+                let token_address_reference = Self::parse_address_optional(&erc20_transfer.address_reference)?;
                 let contract_address = Self::parse_address(&input.to_address)?;
-
-                let payload = Erc20::transfer(token_to_address, token_amount)?;
+                
+                let payload = Erc20::transfer(token_to_address, token_amount, token_address_reference)?;
                 (U256::zero(), payload, Some(contract_address))
             },
             Tx::erc20_approve(ref erc20_approve) => {

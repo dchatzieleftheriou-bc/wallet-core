@@ -67,6 +67,9 @@ pub enum Token {
     ///
     /// solidity name: tuple
     Tuple { params: Vec<NamedToken> },
+    /// Address skips encoding in function
+    ///
+    SkipEncodeInFnAddress(Address),
 }
 
 impl fmt::Display for Token {
@@ -118,6 +121,7 @@ impl fmt::Display for Token {
                     .join(",");
                 write!(f, "({s})")
             },
+            Token::SkipEncodeInFnAddress(addr) => write!(f, "{addr}"),
         }
     }
 }
@@ -138,6 +142,7 @@ impl Serialize for Token {
             Token::FixedArray { arr, .. } => arr.serialize(serializer),
             Token::Array { arr, .. } => arr.serialize(serializer),
             Token::Tuple { params } => params.serialize(serializer),
+            Token::SkipEncodeInFnAddress(addr)  => addr.serialize(serializer),
         }
     }
 }
@@ -214,6 +219,7 @@ impl Token {
                 let params = params.iter().map(|param| param.to_param()).collect();
                 ParamType::Tuple { params }
             },
+            Token::SkipEncodeInFnAddress(_) => ParamType::SkipEncodeInFnAddress,
         }
     }
 }

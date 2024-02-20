@@ -265,6 +265,16 @@ fn decode_param(param: &ParamType, data: &[u8], offset: usize) -> AbiResult<Deco
 
             Ok(result)
         },
+        ParamType::SkipEncodeInFnAddress => {
+            let slice = peek_32_bytes(data, offset)?;
+            let mut address = H160::default();
+            address.copy_from_slice(&slice[12..]);
+            let result = DecodeResult {
+                token: Token::SkipEncodeInFnAddress(Address::from_bytes(address)),
+                new_offset: offset + WORD_LEN,
+            };
+            Ok(result)
+        },
     }
 }
 
@@ -331,6 +341,11 @@ mod tests {
         Token::Address(Address::from_bytes(data))
     }
 
+    fn skipencodeinfn_address(byte: u8) -> Token {
+        let data = H160::from([byte; 20]);
+        Token::SkipEncodeInFnAddress(Address::from_bytes(data))
+    }
+
     fn u256(byte: u8) -> Token {
         let data = H256::from([byte; WORD_LEN]);
         Token::u256(U256::from_big_endian(data))
@@ -351,6 +366,7 @@ mod tests {
         let kind = Box::new(ParamType::Bool);
         let len = NonZeroLen::new(1).unwrap();
         assert!(decode_params_impl(&[ParamType::FixedArray { kind, len }], &[]).is_err());
+        assert!(decode_params_impl(&[ParamType::SkipEncodeInFnAddress], &[]).is_err());
     }
 
     #[test]
@@ -375,6 +391,35 @@ mod tests {
             params: vec![
                 Param::with_type(ParamType::Address),
                 Param::with_type(ParamType::Address),
+                Param::with_type(ParamType::u256()),
+            ],
+        };
+        let decoded = decode_params_impl(&[tuple_type], &encoded).unwrap();
+        assert_eq!(decoded, expected);
+    }
+
+    #[test]
+    fn decode_static_tuple_of_addresses_and_uints_test_skipencodefn_address() {
+        let encoded = concat!(
+            "0000000000000000000000001111111111111111111111111111111111111111",
+            "0000000000000000000000002222222222222222222222222222222222222222",
+            "1111111111111111111111111111111111111111111111111111111111111111"
+        )
+        .decode_hex()
+        .unwrap();
+        let tuple = Token::Tuple {
+            params: vec![
+                NamedToken::with_token(address(0x11_u8)),
+                NamedToken::with_token(skipencodeinfn_address(0x22_u8)),
+                NamedToken::with_token(u256(0x11_u8)),
+            ],
+        };
+        let expected = vec![tuple];
+
+        let tuple_type = ParamType::Tuple {
+            params: vec![
+                Param::with_type(ParamType::Address),
+                Param::with_type(ParamType::SkipEncodeInFnAddress),
                 Param::with_type(ParamType::u256()),
             ],
         };

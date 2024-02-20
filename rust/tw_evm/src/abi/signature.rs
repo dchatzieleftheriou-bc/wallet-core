@@ -20,6 +20,7 @@ pub fn long_signature(name: &str, params: &[ParamType]) -> H256 {
     result
 }
 
+/// Returns the a Vec<U8> of the function signature, eg `transfer(string,uint256)` as Vec<u8>
 fn fill_signature(name: &str, params: &[ParamType], result: &mut [u8]) {
     let types = params
         .iter()

@@ -273,6 +273,11 @@ impl<Context: EvmContext> AbiEncoder<Context> {
                     .collect::<AbiResult<Vec<_>>>()?;
                 Ok(Token::Tuple { params })
             },
+            TokenEnum::skipInFnEncode(addr) => {
+                let addr = Address::from_str(&addr)
+                    .map_err(|_| AbiError(AbiErrorKind::Error_invalid_address_value))?;
+                Ok(Token::SkipEncodeInFnAddress(addr))
+            },
             TokenEnum::None => Err(AbiError(AbiErrorKind::Error_missing_param_value)),
         }
     }
@@ -327,6 +332,7 @@ impl<Context: EvmContext> AbiEncoder<Context> {
                 let params: Vec<_> = params.into_iter().map(Self::param_to_proto).collect();
                 ProtoParamType::tuple(Proto::TupleType { params })
             },
+            ParamType::SkipEncodeInFnAddress => ProtoParamType::address(Proto::AddressType {}),
         };
         Proto::ParamType { param }
     }
@@ -377,6 +383,7 @@ impl<Context: EvmContext> AbiEncoder<Context> {
                 }
                 Ok(ParamType::Tuple { params })
             },
+            ProtoParamType::skipInFnEncodeAddress(_) => Ok(ParamType::SkipEncodeInFnAddress),
             ProtoParamType::None => Err(AbiError(AbiErrorKind::Error_missing_param_type)),
         }
     }
@@ -404,6 +411,7 @@ impl<Context: EvmContext> AbiEncoder<Context> {
             },
             Token::Array { kind, arr, .. } => TokenEnum::array(Self::array_to_proto(kind, arr)),
             Token::Tuple { params } => TokenEnum::tuple(Self::tuple_to_proto(params)),
+            Token::SkipEncodeInFnAddress(addr) => TokenEnum::address(Cow::Owned(addr.to_string())),
         };
         Proto::Token {
             name: "".into(),

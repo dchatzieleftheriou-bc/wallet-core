@@ -134,6 +134,7 @@ fn mediate_token(token: &Token) -> Mediate {
                 Mediate::RawArray(mediates)
             }
         },
+        Token::SkipEncodeInFnAddress(_) => Mediate::Raw(1, token),
     }
 }
 
@@ -159,6 +160,11 @@ fn encode_token_append(data: &mut Vec<H256>, token: &Token) {
         Token::FixedArray { .. } | Token::Array { .. } | Token::Tuple { .. } => {
             debug_assert!(false, "Unhandled nested token: {:?}", token)
         },
+        Token::SkipEncodeInFnAddress(address) => {
+            let mut padded = H256::default();
+            padded[12..].copy_from_slice(address.as_slice());
+            data.push(padded);
+        }
     }
 }
 
@@ -224,9 +230,39 @@ mod tests {
     }
 
     #[test]
+    fn encode_address_skipfn_encode_test() {
+        let address = Token::SkipEncodeInFnAddress("0x1111111111111111111111111111111111111111".into());
+        let encoded = encode_tokens(&[address]);
+        let expected = "0000000000000000000000001111111111111111111111111111111111111111"
+            .decode_hex()
+            .unwrap();
+        assert_eq!(encoded, expected);
+    }
+
+    #[test]
     fn encode_dynamic_array_of_addresses() {
         let address1 = Token::Address("0x1111111111111111111111111111111111111111".into());
         let address2 = Token::Address("0x2222222222222222222222222222222222222222".into());
+        let addresses = Token::Array {
+            arr: vec![address1, address2],
+            kind: ParamType::Address,
+        };
+        let encoded = encode_tokens(&[addresses]);
+        let expected = concat!(
+            "0000000000000000000000000000000000000000000000000000000000000020",
+            "0000000000000000000000000000000000000000000000000000000000000002",
+            "0000000000000000000000001111111111111111111111111111111111111111",
+            "0000000000000000000000002222222222222222222222222222222222222222",
+        )
+        .decode_hex()
+        .unwrap();
+        assert_eq!(encoded, expected);
+    }
+
+    #[test]
+    fn encode_dynamic_array_of_addresses_with_skipencodeinfn_address() {
+        let address1 = Token::Address("0x1111111111111111111111111111111111111111".into());
+        let address2 = Token::SkipEncodeInFnAddress("0x2222222222222222222222222222222222222222".into());
         let addresses = Token::Array {
             arr: vec![address1, address2],
             kind: ParamType::Address,

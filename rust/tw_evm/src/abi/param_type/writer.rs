@@ -49,6 +49,7 @@ impl Writer {
                     "tuple".to_owned()
                 }
             },
+            ParamType::SkipEncodeInFnAddress => "skip_encode_in_fn_address".to_owned(),
         }
     }
 }
@@ -110,5 +111,6 @@ mod tests {
             ),
             "tuple[]"
         );
+        assert_eq!(Writer::write(&ParamType::SkipEncodeInFnAddress), "skip_encode_in_fn_address");
     }
 }

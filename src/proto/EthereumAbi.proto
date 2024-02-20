@@ -48,6 +48,9 @@ message StringType {}
 // Indicates an address type.
 message AddressType {}
 
+// Indicates an address type.
+message SkipEndodingInFnType {}
+
 // Indicates an array type with an inner `element_type`.
 message ArrayType {
     // The type of array elements.
@@ -103,6 +106,8 @@ message ParamType {
 
         // Nested values. Gap in field numbering is intentional.
         TupleType tuple = 19;
+
+        SkipEndodingInFnType skipInFnEncodeAddress = 22;
     }
 }
 
@@ -156,6 +161,8 @@ message Token {
 
         // Nested values. Gap in field numbering is intentional.
         TupleParam tuple = 19;
+
+        string skipInFnEncode = 22;
     }
 }
 

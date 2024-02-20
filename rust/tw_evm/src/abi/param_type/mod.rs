@@ -68,6 +68,11 @@ pub enum ParamType {
     ///
     /// solidity name: tuple
     Tuple { params: Vec<Param> },
+    /// Address skipped
+    ///
+    /// solidity name: address
+    /// Encoded to left padded [0u8; 32].
+    SkipEncodeInFnAddress
 }
 
 impl ParamType {
