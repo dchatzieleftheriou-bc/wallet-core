@@ -141,7 +141,8 @@ fn test_barz_batched_account_deployed() {
     {
         let recipient = Address::from("0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789");
         let amount = U256::from(0x8AC7_2304_89E8_0000_u64);
-        let payload = Erc20::transfer(recipient, amount).unwrap();
+        let address_ref: Option<Address> = None;
+        let payload = Erc20::transfer(recipient, amount, address_ref).unwrap();
 
         calls.push(Proto::mod_Transaction::mod_Batch::BatchedCall {
             address: contract_address.into(),
