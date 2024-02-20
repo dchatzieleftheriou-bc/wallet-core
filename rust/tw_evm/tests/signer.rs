@@ -23,6 +23,7 @@ fn test_sign_transaction_non_typed_erc20_transfer() {
     let erc20_transfer = Proto::mod_Transaction::ERC20Transfer {
         to: "0x5322b34c88ed0691971bf52a7047448f0f4efc84".into(),
         amount: U256::encode_be_compact(2_000_000_000_000_000_000),
+        address_reference: Cow::default()
     };
 
     let input = Proto::SigningInput {
@@ -53,6 +54,48 @@ fn test_sign_transaction_non_typed_erc20_transfer() {
     assert_eq!(
         hex::encode(output.pre_hash, false),
         "b3525019dc367d3ecac48905f9a95ff3550c25a24823db765f92cae2dec7ebfd"
+    );
+}
+
+#[test]
+fn test_sign_transaction_non_typed_erc20_transfer_address_ref() {
+    let private =
+        hex::decode("0x608dcb1742bb3fb7aec002074e3420e4fab7d00cced79ccdac53ed5b27138151").unwrap();
+
+    let erc20_transfer = Proto::mod_Transaction::ERC20Transfer {
+        to: "0x5322b34c88ed0691971bf52a7047448f0f4efc84".into(),
+        amount: U256::encode_be_compact(2_000_000_000_000_000_000),
+        address_reference: "0x3535353535353535353535353535353535353535".into()
+    };
+
+    let input = Proto::SigningInput {
+        chain_id: U256::encode_be_compact(1),
+        tx_mode: TransactionMode::Legacy,
+        // 42000000000
+        gas_price: U256::encode_be_compact(0x09_c765_2400),
+        // 78009
+        gas_limit: U256::encode_be_compact(0x01_30B9),
+        // DAI
+        to_address: "0x6b175474e89094c44da98b954eedeac495271d0f".into(),
+        transaction: Some(Proto::Transaction {
+            transaction_oneof: Proto::mod_Transaction::OneOftransaction_oneof::erc20_transfer(
+                erc20_transfer,
+            ),
+        }),
+        private_key: private.into(),
+        ..Proto::SigningInput::default()
+    };
+
+    let output = Signer::<StandardEvmContext>::sign_proto(input);
+    assert_eq!(output.error, SigningErrorType::OK);
+    assert!(output.error_message.is_empty());
+
+    let expected = "f8ca808509c7652400830130b9946b175474e89094c44da98b954eedeac495271d0f80b864a9059cbb0000000000000000000000005322b34c88ed0691971bf52a7047448f0f4efc840000000000000000000000000000000000000000000000001bc16d674ec80000000000000000000000000000353535353535353535353535353535353535353525a04bf4664fc9a274a5b8cfa0d6ee7c904787c02825856d25896d225aff4efd3802a04e174f780c13a4b99ac1ee9528cef4e22dc475be68d4eb4944b7c61bd016be60";
+    assert_eq!(hex::encode(output.encoded, false), expected);
+
+    assert_eq!(
+        hex::encode(output.data, false),
+        "a9059cbb0000000000000000000000005322b34c88ed0691971bf52a7047448f0f4efc840000000000000000000000000000000000000000000000001bc16d674ec800000000000000000000000000003535353535353535353535353535353535353535"
     );
 }
 
@@ -250,6 +293,7 @@ fn test_sign_transaction_eip1559_erc20_transfer() {
     let erc20_transfer = Proto::mod_Transaction::ERC20Transfer {
         to: "0x5322b34c88ed0691971bf52a7047448f0f4efc84".into(),
         amount: U256::encode_be_compact(2_000_000_000_000_000_000),
+        address_reference: Cow::default(),
     };
 
     let input = Proto::SigningInput {
@@ -529,6 +573,7 @@ fn test_sign_transaction_non_typed_erc20_transfer_invalid_address() {
     let erc20_transfer = Proto::mod_Transaction::ERC20Transfer {
         to: "0x5322b34c88ed0691971bf52a7047448f0f4efc84".into(),
         amount: U256::encode_be_compact(2_000_000_000_000_000_000),
+        address_reference: Cow::default()
     };
 
     let input = Proto::SigningInput {
