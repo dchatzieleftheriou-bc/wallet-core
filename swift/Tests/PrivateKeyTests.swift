@@ -61,4 +61,12 @@ class PrivateKeyTests: XCTestCase {
         XCTAssertEqual(sig.hexString, "d166b1ae7892c5ef541461dc12a50214d0681b63d8037cda29a3fe6af8bb973e4ea94624d85bc0010bdc1b38d05198328fae21254adc2bf5feaf2804d54dba55")
         XCTAssertTrue(verified)
     }
+
+    func testCardano() {
+        let data = Data(hexString: "9853acc5520d0d8f8697a11f0400ef93140e327a0ef39cfc059dbbe7c2f5e84182842f0dc9978eb558290a643334c246e758f809c4361b16c5610f62de5286da694c6b6604a6fd72d67bd563b56221d8aaa585a7ac498bc7015a831d524e6356")!
+        XCTAssertTrue(PrivateKey.isValid(data: data, curve: .ed25519ExtendedCardano))
+        let privateKey = PrivateKey(data: data)!
+        let pubKey = privateKey.getPublicKeyByType(pubkeyType: .ed25519Cardano)
+        XCTAssertEqual(pubKey.data.hexString, "546107190a46ccc825d4a099b29cabe8da529fff8432bc7d5a7b202710ec3ce2694c6b6604a6fd72d67bd563b56221d8aaa585a7ac498bc7015a831d524e6356")
+    }
 }

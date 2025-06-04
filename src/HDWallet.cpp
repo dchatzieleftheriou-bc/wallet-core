@@ -203,6 +203,35 @@ PrivateKey HDWallet<seedSize>::getKeyByCurve(TWCurve curve, const DerivationPath
 }
 
 template <std::size_t seedSize>
+PrivateKey HDWallet<seedSize>::getCardanoAccountKey(const DerivationPath& accountPath) const {
+    if (accountPath.indices.size() != 3 ||
+        accountPath.indices[0].value != 1852 ||
+        accountPath.indices[1].value != 1815) {
+        throw std::invalid_argument("Invalid Cardano account path");
+    }
+
+    auto node = getNode(*this, TWCurveED25519ExtendedCardano, accountPath);
+
+    auto pkData = Data(node.private_key, node.private_key + PrivateKey::_size);
+    auto extData = Data(node.private_key_extension, node.private_key_extension + PrivateKey::_size);
+    auto chainCode = Data(node.chain_code, node.chain_code + PrivateKey::_size);
+
+    Data keyData;
+    append(keyData, pkData);
+    append(keyData, extData);
+    append(keyData, chainCode);
+
+    TW::memzero(&node);
+    return PrivateKey(keyData, TWCurveED25519ExtendedCardano);
+}
+
+template <std::size_t seedSize>
+PublicKey HDWallet<seedSize>::getCardanoAccountPublicKey(const DerivationPath& accountPath) const {
+    auto privateKey = getCardanoAccountKey(accountPath);
+    return privateKey.getPublicKey(TWPublicKeyTypeED25519Cardano);
+}
+
+template <std::size_t seedSize>
 PrivateKey HDWallet<seedSize>::getKey(TWCoinType coin, const DerivationPath& derivationPath) const {
     const auto curve = TWCoinTypeCurve(coin);
     return getKeyByCurve(curve, derivationPath);

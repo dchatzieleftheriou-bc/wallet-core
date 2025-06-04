@@ -178,6 +178,25 @@ struct TWPrivateKey* _Nonnull TWHDWalletGetKeyByCurve(struct TWHDWallet* _Nonnul
 TW_EXPORT_METHOD
 struct TWPrivateKey* _Nonnull TWHDWalletGetDerivedKey(struct TWHDWallet* _Nonnull wallet, enum TWCoinType coin, uint32_t account, uint32_t change, uint32_t address);
 
+
+/// Returns the Cardano account-level private key (m/1852'/1815'/0')
+///
+/// \param wallet non-null TWHDWallet
+/// \param accountPath non-null derivation path
+/// \note Returned object needs to be deleted with \TWPrivateKeyDelete
+/// \return Non-null corresponding private key
+TW_EXPORT_METHOD
+struct TWPrivateKey* _Nonnull TWHDWalletGetCardanoAccountKey(struct TWHDWallet* _Nonnull wallet, struct TWDerivationPath* _Nonnull accountPath);
+
+/// Returns the Cardano account-level public key (m/1852'/1815'/0')
+///
+/// \param wallet non-null TWHDWallet
+/// \param accountPath non-null derivation path
+/// \note Returned object needs to be deleted with \TWPublicKeyDelete
+/// \return Non-null corresponding public key
+TW_EXPORT_METHOD
+struct TWPublicKey* _Nonnull TWHDWalletGetCardanoAccountPublicKey(struct TWHDWallet* _Nonnull wallet, struct TWDerivationPath* _Nonnull accountPath);
+
 /// Returns the extended private key (for default 0 account).
 ///
 /// \param wallet non-null TWHDWallet

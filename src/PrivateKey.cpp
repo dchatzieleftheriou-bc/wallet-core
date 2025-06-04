@@ -55,7 +55,7 @@ Data rust_private_key_sign(const Data& key, const Data& hash, TWCurve curve) {
 
 bool PrivateKey::isValid(const Data& data) {
     // Check length
-    if (data.size() != _size && data.size() != cardanoKeySize) {
+    if (data.size() != _size && data.size() != cardanoKeySize && data.size() != cardanoKeySize/2) {
         return false;
     }
 
@@ -189,22 +189,24 @@ PublicKey PrivateKey::getPublicKey(TWPublicKeyType type) const {
         ed25519_publickey_blake2b(key().data(), result.data());
         break;
     case TWPublicKeyTypeED25519Cardano: {
-        // must be double extended key
-        if (bytes.size() != cardanoKeySize) {
+        // Check if we have a full extended key (192 bytes) or just account key (96 bytes)
+        if (bytes.size() != cardanoKeySize && bytes.size() != cardanoKeySize/2) {
             throw std::invalid_argument("Invalid extended key");
         }
         Data pubKey(PublicKey::ed25519Size);
 
         // first key
-        ed25519_publickey_ext(key().data(), pubKey.data());
+        ed25519_publickey_ext(key().data(), pubKey.data()); 
         append(result, pubKey);
         // copy chainCode
         append(result, chainCode());
 
-        // second key
-        ed25519_publickey_ext(secondKey().data(), pubKey.data());
-        append(result, pubKey);
-        append(result, secondChainCode());
+        // second key - only if we have full extended key
+        if (bytes.size() == cardanoKeySize) {
+            ed25519_publickey_ext(secondKey().data(), pubKey.data());
+            append(result, pubKey);
+            append(result, secondChainCode());
+        }
     } break;
 
     case TWPublicKeyTypeCURVE25519: {

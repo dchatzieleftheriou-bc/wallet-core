@@ -125,6 +125,14 @@ TWString *_Nonnull TWHDWalletGetExtendedPublicKeyDerivation(struct TWHDWallet *w
     return new std::string(wallet->impl.getExtendedPublicKeyDerivation(purpose, coin, derivation, version));
 }
 
+struct TWPrivateKey* _Nonnull TWHDWalletGetCardanoAccountKey(struct TWHDWallet* _Nonnull wallet, struct TWDerivationPath* _Nonnull accountPath) {
+    return new TWPrivateKey{ wallet->impl.getCardanoAccountKey(accountPath->impl) };
+}
+
+struct TWPublicKey* _Nonnull TWHDWalletGetCardanoAccountPublicKey(struct TWHDWallet* _Nonnull wallet, struct TWDerivationPath* _Nonnull accountPath) {
+    return new TWPublicKey{ wallet->impl.getCardanoAccountPublicKey(accountPath->impl) };
+}
+
 TWPublicKey *TWHDWalletGetPublicKeyFromExtended(TWString *_Nonnull extended, enum TWCoinType coin, TWString *_Nonnull derivationPath) {
     const auto derivationPathObject = DerivationPath(*reinterpret_cast<const std::string*>(derivationPath));
     auto publicKey = HDWallet<>::getPublicKeyFromExtended(*reinterpret_cast<const std::string*>(extended), coin, derivationPathObject);

@@ -559,6 +559,63 @@ class HDWalletTests: XCTestCase {
         XCTAssertEqual(address, "band1pe8xm2r46rmctsukuqu7gl900vzprfsp4sguc3")
     }
 
+    // Cardano specific
+
+    func testCardanoAccountKey() {
+        let wallet = HDWallet(mnemonic: "hungry language artwork away immune clerk mammal student detect gun element open", passphrase: "")!
+        let accountPath = DerivationPath("m/1852'/1815'/0'")!
+
+        // Test private key
+        let privateKey = wallet.getCardanoAccountKey(accountPath: accountPath)
+        XCTAssertEqual(privateKey.data.hexString, "9853acc5520d0d8f8697a11f0400ef93140e327a0ef39cfc059dbbe7c2f5e84182842f0dc9978eb558290a643334c246e758f809c4361b16c5610f62de5286da694c6b6604a6fd72d67bd563b56221d8aaa585a7ac498bc7015a831d524e6356")
+
+        // Test public key
+        let publicKey = wallet.getCardanoAccountPublicKey(accountPath: accountPath)
+        XCTAssertEqual(publicKey.data.hexString, "546107190a46ccc825d4a099b29cabe8da529fff8432bc7d5a7b202710ec3ce2694c6b6604a6fd72d67bd563b56221d8aaa585a7ac498bc7015a831d524e6356")
+        let bech32Xpub = Bech32.encode(hrp: "xpub", data: publicKey.data)
+        XCTAssertEqual(bech32Xpub, "xpub123sswxg2gmxvsfw55zvm989tard998llssetcl260vszwy8v8n3xjnrtvcz2dltj6eaa2ca4vgsa3249skn6cjvtcuq44qca2f8xx4syzyqc0")
+
+        let accountPathOne = DerivationPath("m/1852'/1815'/1'")!
+
+        let privateKeyOne = wallet.getCardanoAccountKey(accountPath: accountPathOne)
+        XCTAssertEqual(privateKeyOne.data.hexString, "9853acc5520d0d8f8697a11f0400ef93140e327a0ef39cfc059dbbe7c2f5e84182842f0dc9978eb558290a643334c246e758f809c4361b16c5610f62de5286da694c6b6604a6fd72d67bd563b56221d8aaa585a7ac498bc7015a831d524e6356")
+
+        // Test public key
+        let publicKeyOne = wallet.getCardanoAccountPublicKey(accountPath: accountPathOne)
+        XCTAssertEqual(publicKeyOne.data.hexString, "546107190a46ccc825d4a099b29cabe8da529fff8432bc7d5a7b202710ec3ce2694c6b6604a6fd72d67bd563b56221d8aaa585a7ac498bc7015a831d524e6356")
+        let bech32XpubOne = Bech32.encode(hrp: "xpub", data: publicKey.data)
+        XCTAssertEqual(bech32XpubOne, "xpub123sswxg2gmxvsfw55zvm989tard998llssetcl260vszwy8v8n3xjnrtvcz2dltj6eaa2ca4vgsa3249skn6cjvtcuq44qca2f8xx4syzyqc0")
+    }
+
+    func testCardanoMore() {
+        let wallet = HDWallet(mnemonic: "priority top match suspect seat near fiber match turtle ecology output zero this announce pen clerk blood cluster begin know cheap shoot among jacket", passphrase: "")!
+        let accountPath = DerivationPath("m/1852'/1815'/0'")!
+
+        // Test private key
+        let privateKey = wallet.getCardanoAccountKey(accountPath: accountPath)
+        XCTAssertEqual(privateKey.data.hexString, "20f27b66c0e70992b42b4e660ef6e6f65ae855e9354050e37210669fedb7e956bf865626da1e5db89aa62d8292c3eac8d05c2b32141e7f7bdaa5b1a1ec40e04574c0f111cb4044232e16af148ab22a9efb2ba222c2a096e410e052ab8f1f9e65")
+
+        // Test public key
+        let publicKey = wallet.getCardanoAccountPublicKey(accountPath: accountPath)
+        XCTAssertEqual(publicKey.data.hexString, "b65b83866d79d04be7fa07a4df413fe2d16a99ea5cdea606070eca2e63c4e1c374c0f111cb4044232e16af148ab22a9efb2ba222c2a096e410e052ab8f1f9e65")
+        let bech32Xpub = Bech32.encode(hrp: "xpub", data: publicKey.data)
+        XCTAssertEqual(bech32Xpub, "xpub1kedc8pnd08gyhel6q7jd7sflutgk4x02tn02vps8pm9zuc7yu8phfs83z895q3pr9ct279y2kg4fa7et5g3v9gykusgwq54t3u0eueghq3q3r")
+    }
+
+    func testCardano() {
+        let wallet = HDWallet.test
+        let accountPath = DerivationPath("m/1852'/1815'/0'")!
+
+        let privateKey = wallet.getCardanoAccountKey(accountPath: accountPath)
+        XCTAssertEqual(privateKey.data.hexString,
+                       "289de878a776088d8bb0fcc1a1215463d30b79c07f96060e1b66ea690fa14952f2d1ed5b4fa9af04ab1405f72aae65169a36b7596eba20eacaf48bea1315f398b06343d03a9b77cc063e236f188c7c123af6af9bb64a5491c6afda2b1329fad2")
+        let publicKey = privateKey.getPublicKeyEd25519Cardano()
+        XCTAssertEqual(publicKey.data.hexString, "872b422edf0a879c13b88b07e55afafbcb66aba71617ddaa174cc4d85ddc809bb06343d03a9b77cc063e236f188c7c123af6af9bb64a5491c6afda2b1329fad2")
+
+        let bech32Xpub = Bech32.encode(hrp: "xpub", data: publicKey.data)
+        XCTAssertEqual(bech32Xpub, "xpub1su45ytklp2recyac3vr72kh6l09kd2a8zctam2shfnzdshwuszdmqc6r6qafka7vqclzxmcc337pywhk47dmvjj5j8r2lk3tzv5l45s3ctdfw")
+    }
+
     func testGenerateMultiThreaded() throws {
         let group = DispatchGroup()
         for _ in 0..<5 {

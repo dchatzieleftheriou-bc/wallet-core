@@ -86,6 +86,12 @@ public:
     /// Returns the private key at the given derivation path and curve.
     PrivateKey getKeyByCurve(TWCurve curve, const DerivationPath& derivationPath) const;
 
+    /// Returns the Cardano account-level private key, eg (m/1852'/1815'/0')
+    PrivateKey getCardanoAccountKey(const DerivationPath& accountPath) const;
+
+    /// Returns the Cardano account-level public key, eg (m/1852'/1815'/0')
+    PublicKey getCardanoAccountPublicKey(const DerivationPath& accountPath) const;
+
     /// Derives the address for a coin (default derivation).
     std::string deriveAddress(TWCoinType coin) const;
 

@@ -650,4 +650,31 @@ TEST(HDWallet, IoTexKeys) {
     // io1qmkv62pvg56qkashkwauhhjv3gtjhcm889r8dc
 }
 
+// CARDANO
+
+TEST(HDWallet, CardanoAccountKey) {
+    // Test mnemonic from existing test cases
+    const auto mnemonic = "hungry language artwork away immune clerk mammal student detect gun element open";
+    HDWallet wallet = HDWallet(mnemonic, "");
+    
+    // Test account key derivation
+    const auto accountPath = DerivationPath("m/1852'/1815'/0'");
+    const auto privateKey = wallet.getCardanoAccountKey(accountPath);
+    EXPECT_EQ(hex(privateKey.bytes), "9853acc5520d0d8f8697a11f0400ef93140e327a0ef39cfc059dbbe7c2f5e84182842f0dc9978eb558290a643334c246e758f809c4361b16c5610f62de5286da694c6b6604a6fd72d67bd563b56221d8aaa585a7ac498bc7015a831d524e6356");
+
+    // Test public key derivation
+    const auto publicKey = privateKey.getPublicKey(TWPublicKeyTypeED25519Cardano);
+    EXPECT_EQ(hex(publicKey.bytes), "546107190a46ccc825d4a099b29cabe8da529fff8432bc7d5a7b202710ec3ce2694c6b6604a6fd72d67bd563b56221d8aaa585a7ac498bc7015a831d524e6356");
+
+    // Test another valid account path
+    const auto accountPath1 = DerivationPath("m/1852'/1815'/1'");
+    const auto privateKey1 = wallet.getCardanoAccountKey(accountPath1);
+    EXPECT_EQ(hex(privateKey1.bytes), "60b748d91acff81ea449fbb969b9dd3e93379dc4416ae1c51fbf29a3c3f5e841e0f867214e237def1afa11496995018da054e70ae40061c95200196c9abc1d38620e2f2085d6a81ed8ba7583d275b7eacd5484cfff3d37f3fbc708f5755b0180");
+    const auto publicKey1 = privateKey1.getPublicKey(TWPublicKeyTypeED25519Cardano);
+    EXPECT_EQ(hex(publicKey1.bytes), "2d933720d2f0a96b4e4b73c3714dd356a42a2070513da5b2a2ecfb2bb7b0358d620e2f2085d6a81ed8ba7583d275b7eacd5484cfff3d37f3fbc708f5755b0180");
+    // Verify different account indices produce different keys
+    EXPECT_NE(hex(privateKey1.bytes), hex(privateKey.bytes));
+    EXPECT_NE(hex(publicKey1.bytes), hex(publicKey.bytes));
+}
+
 } // namespace TW::HDWalletTests
